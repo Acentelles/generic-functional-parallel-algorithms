@@ -20,8 +20,6 @@ module Generic.FFT
   )
 where
 
--- Add list of exports
-
 import Control.Applicative (liftA2)
 import Control.Arrow ((***))
 import Data.Complex
@@ -35,14 +33,11 @@ import Generic.Types
 -- each of which consists of N/2 computations
 
 class FFT f where
-
   -- Associated type family
   type FFO f :: * -> *
 
   fft :: RealFloat a => f (Complex a) -> FFO f (Complex a)
-
   default fft ::
-    -- Add the constraint later
     (Generic1 f, Generic1 (FFO f), FFT (Rep1 f), FFO (Rep1 f) ~ Rep1 (FFO f), RealFloat a) =>
     f (Complex a) ->
     FFO f (Complex a)
@@ -52,20 +47,17 @@ class FFT f where
 
 -- These are functors
 instance FFT U1 where
-
   type FFO U1 = U1
 
   fft U1 = U1
 
 instance FFT Par1 where
-
   type FFO Par1 = Par1
 
   fft (Par1 a) = Par1 a
 
 -- We are building FFTs of perfect binary trees
 instance FFT Pair where
-
   type FFO Pair = Pair
 
   fft (a :# b) = (a + b) :# (a - b)
@@ -90,7 +82,6 @@ instance
   ) =>
   FFT (g :.: f)
   where
-
   type FFO (g :.: f) = FFO f :.: FFO g
 
   fft = Comp1 . ffts' . sequenceA . twiddle . ffts' . unComp1
@@ -114,4 +105,3 @@ omegas = fga
     ga = fst $ powers (exp (0 :+ negate (2 * pi / fromIntegral (size (Comp1 fga)))))
     fga :: g (f (Complex a))
     fga = fst . powers <$> ga
--- deriving instance FFT (RVec 'Z)
